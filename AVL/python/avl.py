@@ -9,14 +9,14 @@ class Tree:
     def __init__(self):
         self.root = Node()
 
-    def __str__(self, *args, **kwargs):
-        return self.root.__str__(*args, **kwargs)
+    def __str__(self):
+        return self.root.__str__(recursive=True)
 
     @classmethod
     def build(cls, array: list) -> Tree:
         tree = cls()
         for value in array:
-            tree.root.insert(value)
+            tree.root = tree.root.insert(value)
         return tree
 
 
@@ -24,7 +24,9 @@ class Node:
     value: Optional[int]
     left: Optional[Node]
     right: Optional[Node]
+    parent: Optional[Node]
     height: int
+    weight: int
 
     def __init__(self):
         self.value = None
@@ -32,19 +34,79 @@ class Node:
         self.right = None
         self.height = -1
 
-    def insert(self, value: int) -> None:
-        if self.value is None:
+    def insert(self, value: int) -> Node:
+        if self.value == value:
+            raise ValueError("This value already exists inside the tree.")
+        self._insert(value)
+        self.update_height()
+        return self if self.avl else self.fix_avl()
+
+    def fix_avl(self) -> Node:
+        node = self
+        t = 1
+        while not node.avl:
+            if node.weight > 0:
+                if node.right.weight < 0:
+                    node.right = node.right.right_rotate()
+                node = node.left_rotate()
+            else:
+                if node.right.weight > 0:
+                    node.left = node.left.left_rotate()
+                node = node.right_rotate()
+            node.left = node.left.fix_avl()
+            node.right = node.right.fix_avl()
+        return node
+
+    def _insert(self, value: int) -> None:
+        if not self:
             self.value = value
             self.left = Node()
             self.right = Node()
-        elif value < self.value:
-            self.left.insert(value)
-        else:
-            self.right.insert(value)
-        self.update_height()
+            return
+        if value < self.value:
+            self.left = self.left.insert(value)
+            return
+        self.right = self.right.insert(value)
 
     def update_height(self) -> None:
         self.height = max(self.left.height, self.right.height) + 1
+
+    @property
+    def weight(self) -> int:
+        return self.right.height - self.left.height if self else 0
+
+    @property
+    def avl(self) -> bool:
+        return self.weight in range(-1, 2)
+
+    def left_rotate(self) -> Node:
+        child = self
+        parent = self.right
+        t = 1
+        if parent.left:
+            parent = parent.right_rotate()
+
+        child.right = Node()
+        child.update_height()
+
+        parent.left = child
+        parent.update_height()
+
+        return parent
+
+    def right_rotate(self) -> Node:
+        child = self
+        parent = self.left
+        if parent.right:
+            parent = parent.left_rotate()
+
+        child.left = Node()
+        child.update_height()
+
+        parent.right = child
+        parent.update_height()
+
+        return parent
 
     def __bool__(self):
         return self.value is not None
@@ -52,7 +114,7 @@ class Node:
     def __str__(self, spacer_width=0, recursive=False):
         if recursive is False:
             lines, empty = spacer_width // 2, spacer_width // 2 + spacer_width % 2
-            if self.value:
+            if self:
                 left_spacer = " " * empty + "_" * lines
                 right_spacer = "_" * lines + " " * empty
                 value = str(self.value)
@@ -85,5 +147,5 @@ class Node:
 
 
 if __name__ == '__main__':
-    tree = Tree.build([5, 3, 7, 1, 8, 4, 9, 5, 6, 0, 8, 4, 3, 6, 2, 1, 8])
-    print(tree.__str__(recursive=True))
+    tree = Tree.build([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+    print(tree)
