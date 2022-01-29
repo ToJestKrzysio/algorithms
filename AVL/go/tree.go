@@ -5,9 +5,9 @@ type Tree struct {
 }
 
 func NewTree(array []int) (tree Tree) {
-	tree = Tree{root: NewNode(array[0], nil)}
+	tree = Tree{root: NewNode(array[0])}
 	for i := 1; i < len(array); i++ {
-		tree.root.Insert(array[i])
+		tree.root = tree.root.Insert(array[i])
 	}
 	return tree
 }

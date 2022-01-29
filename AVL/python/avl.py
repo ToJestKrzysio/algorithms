@@ -43,7 +43,6 @@ class Node:
 
     def fix_avl(self) -> Node:
         node = self
-        t = 1
         while not node.avl:
             if node.weight > 0:
                 if node.right.weight < 0:
@@ -82,7 +81,6 @@ class Node:
     def left_rotate(self) -> Node:
         child = self
         parent = self.right
-        t = 1
         if parent.left:
             parent = parent.right_rotate()
 
@@ -147,5 +145,5 @@ class Node:
 
 
 if __name__ == '__main__':
-    tree = Tree.build([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+    tree = Tree.build([0, 1, 2, 3, 4, 5])
     print(tree)
