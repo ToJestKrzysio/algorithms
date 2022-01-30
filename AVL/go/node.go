@@ -37,7 +37,7 @@ func (node *Node) Insert(value int) *Node {
 			node.right = node.right.Insert(value)
 		}
 	}
-	node.height, node.weight = node.updateHeightAndWeight()
+	node.updateHeightAndWeight()
 	return node.fixAVL()
 }
 
@@ -62,6 +62,7 @@ func (node *Node) fixAVL() *Node {
 			newNode.right = newNode.right.fixAVL()
 		}
 	}
+	newNode.updateHeightAndWeight()
 	return newNode
 }
 
@@ -72,10 +73,10 @@ func (node *Node) leftRotate() *Node {
 	}
 
 	child.right = nil
-	child.height, child.weight = child.updateHeightAndWeight()
+	child.updateHeightAndWeight()
 
 	parent.left = child
-	parent.height, parent.weight = parent.updateHeightAndWeight()
+	parent.updateHeightAndWeight()
 
 	return parent
 }
@@ -87,10 +88,10 @@ func (node *Node) rightRotate() *Node {
 	}
 
 	child.left = nil
-	child.height, child.weight = parent.updateHeightAndWeight()
+	child.updateHeightAndWeight()
 
 	parent.right = child
-	parent.height, parent.weight = parent.updateHeightAndWeight()
+	parent.updateHeightAndWeight()
 
 	return parent
 }
@@ -99,7 +100,7 @@ func (node Node) invalidAVL() bool {
 	return -1 > node.weight || node.weight > 1
 }
 
-func (node Node) updateHeightAndWeight() (int, int) {
+func (node *Node) updateHeightAndWeight() {
 	left := -1
 	if node.left != nil {
 		left = node.left.height
@@ -109,9 +110,11 @@ func (node Node) updateHeightAndWeight() (int, int) {
 		right = node.right.height
 	}
 	if left > right {
-		return left + 1, right - left
+		node.height = left + 1
+	} else {
+		node.height = right + 1
 	}
-	return right + 1, right - left
+	node.weight = right - left
 }
 
 func (node Node) Print() {
